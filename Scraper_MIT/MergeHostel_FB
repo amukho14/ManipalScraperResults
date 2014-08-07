@@ -1,0 +1,25 @@
+f= open("C:\\Users\\amukhopadhyay\\Downloads\\FB.txt", 'r')
+cur=""
+prev=""
+flag=0
+for i in f.readlines():
+    buffer= i.split(" ")
+    print buffer
+    for cur in buffer:
+        if flag!=1:
+            if cur=="Ayshwarya": #check first name
+                #first name matches, set flag and check for last name
+                flag = 1
+
+                print prev+ "WE DID IT"
+                print cur
+                # print cur+1
+            else:
+                prev= i
+        else:
+            #first name matches
+            if cur == "Balasubramanian"+"'s": #both match
+                print "NO NOW WE DID IT"
+                flag=0
+    print i
+    raw_input()
