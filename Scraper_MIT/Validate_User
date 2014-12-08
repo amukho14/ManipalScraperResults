@@ -107,12 +107,6 @@ def writeGPA(br, f, reg, bday):
 
 class doAllTheWork(threading.Thread):
     def run(self):
-        # global TOTAL
-        # for i in range(100000):
-        #     MY_LOCK.acquire()
-        #     TOTAL = TOTAL + 1
-        #     MY_LOCK.release()
-        # print('%s\n' % (TOTAL))
         bday = iterateOver(br, reg)
         if bday == "invalid":
             print "\n\n\n", "regchange  ",reg, "\n\n\n"
