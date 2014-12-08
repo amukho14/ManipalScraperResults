@@ -1,6 +1,7 @@
 from mechanize import Browser
 import thread
 from bs4 import BeautifulSoup,SoupStrainer
+import threading
 
 def validate(br, bday, reg):
     br.select_form(name="loginform")
@@ -104,70 +105,49 @@ def writeGPA(br, f, reg, bday):
 
 
 
+class doAllTheWork(threading.Thread):
+    def run(self):
+        # global TOTAL
+        # for i in range(100000):
+        #     MY_LOCK.acquire()
+        #     TOTAL = TOTAL + 1
+        #     MY_LOCK.release()
+        # print('%s\n' % (TOTAL))
+        bday = iterateOver(br, reg)
+        if bday == "invalid":
+            print "\n\n\n", "regchange  ",reg, "\n\n\n"
+            reg+=2
+        else:
+            f = open('gpa_IT.csv','a')
+            # python will convert \n to os.linesep
+            MY_LOCK.acquire()
+            writeGPA(br, f, reg, bday)
+            f.close()
+            reg+=2
+            MY_LOCK.release()
+            print "\n\n\n", "regchange  ",reg, "\n\n\n"
+            br = Browser()
+
+            # choice = raw_input('continue?')
+            # if choice == "1":
+            #     break
+            # else:
+            # f = open('gpa_IT.csv','a')
+            br.open("http://websismit.manipal.edu/websis/control/main/")
+
+
 
 br = Browser()
+br.set_handle_robots(False)
+br.set_handle_equiv(False)
+br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
 br.open("http://websismit.manipal.edu/websis/control/main/")
 print br.response()
-reg = 100911513
+reg = 100911001
+result[500]=[]
+i=0
 while reg < 100911700:
-    bday = iterateOver(br, reg)
-    if bday == "invalid":
-        print "\n\n\n", "regchange  ",reg, "\n\n\n"
-        reg+=2
-    else:
-        f = open('gpa_IT.csv','a')
-        # python will convert \n to os.linesep
-        writeGPA(br, f, reg, bday)
-        f.close()
-        reg+=2
-        print "\n\n\n", "regchange  ",reg, "\n\n\n"
-        br = Browser()
-
-        # choice = raw_input('continue?')
-        # if choice == "1":
-        #     break
-        # else:
-        f = open('gpa_IT.csv','a')
-        br.open("http://websismit.manipal.edu/websis/control/main/")
-
-
-
-
-
-# br.select_form(name="loginform")
-#     # Browser passes through unknown attributes (including methods)
-#     # to the selected HTMLForm (from ClientForm).
-#     #br["cheeses"] = ["mozzarella", "caerphilly"]  # (the method here is __setitem__)
-# br["idValue"] = "100911407"
-# br["birthDate"] = "1993-01-15"
-#
-#
-# response = br.submit()
-# soup = BeautifulSoup(br.response().read())
-# soup = BeautifulSoup(soup.prettify())
-# # divTag = soup.find_all("div", {"class":"nav-collapse collapse"})
-# # divTag = soup.find_all("ul", {"class":"nav top-2"})
-#
-# for link in soup.find_all('a'):
-#     x = link.string
-#     y = str(x).strip()
-#     if y == "Student Profile":
-#         print "valid"
-#     else:
-#         print "invalid"
-#     break
-#
-#
-#
-# # print BeautifulSoup(divTag.prettify())
-# # divT = divTag.find_all("a")
-# # print divT
-# # for link in BeautifulSoup(divTag, parseOnlyThese=SoupStrainer('a')):
-#
-# # print divTag
-#
-#
-#
-# # for link in divTag:
-# #     # divT = soup.find_all("a")
-# #     print link
+    result[100911001-i] = doAllTheWork()
+    result[100911001-i] .start()
+    print "i"+str(i), "\n"
+    i+=1
